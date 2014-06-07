@@ -1,16 +1,37 @@
+/* JavaScript Public-Key-Pins calculator - JavaScript library for easy 
+ * calculation of public key hashes for use in Public Key Pinning Extension for HTTP.
+ * Copyright (C) 2014 Davis Mosenkovs
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * http://www.gnu.org/copyleft/gpl.html
+ */
+
 // namespace definition
 var pkps = pkps || {};
 
 /**
  * Generates public key hashes for specified certificate or CSR in PEM format.
+ * Currently only RSA keys are supported.
  * Before calling this method, pkps.doSelfTests() must have been called.
  *
  * @param certificateOrCsr certificate or certificate signing request in PEM format.
- * @return publicKeyPins object with the hashes.
+ * @return publicKeyPin object with the hashes.
  *   getPublicKeyHash() and getPublicKeyPem() methods should be used on this object.
  * @throws string with textual description of failure.
  */
-pkps.publicKeyPins = function(certificateOrCsr) {
+pkps.publicKeyPin = function(certificateOrCsr) {
     // input validation
     if(typeof(certificateOrCsr)!=="string" || certificateOrCsr.length<220)
         throw "Unable to decode input.";
@@ -23,6 +44,7 @@ pkps.publicKeyPins = function(certificateOrCsr) {
     this.pkpem = null;
     this.keysize = null;
     this.type = null;
+    this.cn = null;
     this.hashes = new Array();
 
     var cert = null;
@@ -60,6 +82,17 @@ pkps.publicKeyPins = function(certificateOrCsr) {
     }
 
     try {
+        // extract Nommon Name
+        this.cn = cert.subject.getField("CN").value;
+        if(typeof(this.cn)!=="string" || this.cn.length<1)
+            throw 1;
+    }
+    catch(e) {
+        throw "Unable extract Common Name.";
+    }
+
+
+    try {
         // generate hashes
         this.addHash("sha1", forge.md.sha1, 20);
         this.addHash("sha256", forge.md.sha256, 32);
@@ -72,7 +105,7 @@ pkps.publicKeyPins = function(certificateOrCsr) {
 }
 
 // used internally - generates and stores a hash
-pkps.publicKeyPins.prototype.addHash = function(hashType, forgeMd, dSize) {
+pkps.publicKeyPin.prototype.addHash = function(hashType, forgeMd, dSize) {
     var md = forgeMd.create();
     if(typeof(this.pk)!=="string" || this.keysize!==this.pk.length) // check key length
         throw 1;
@@ -95,8 +128,26 @@ pkps.self_tests_csrPEM = "-----BEGIN CERTIFICATE REQUEST-----\r\nMIICvDCCAaQCAQA
  *
  * @return string with properly formatted text with public key in PEM format.
  */
-pkps.publicKeyPins.prototype.getPublicKeyPem = function() {
+pkps.publicKeyPin.prototype.getPublicKeyPem = function() {
     return this.pkpem;
+}
+
+/**
+ * Returns type of object from which public key was extracted.
+ *
+ * @return string of whether "Certificate" or "CSR".
+ */
+pkps.publicKeyPin.prototype.getType = function() {
+    return this.type;
+}
+
+/**
+ * Returns Common Name (CN attribute) of object from wiich public key was extracted.
+ *
+ * @return string with Common Name.
+ */
+pkps.publicKeyPin.prototype.getCN = function() {
+    return this.cn;
 }
 
 /**
@@ -109,7 +160,7 @@ pkps.publicKeyPins.prototype.getPublicKeyPem = function() {
  * @return string with public key hash either in Base64 or hex format.
  * @throws string with error description if called incurrectly.
  */
-pkps.publicKeyPins.prototype.getPublicKeyHash = function(hashType, hex) {
+pkps.publicKeyPin.prototype.getPublicKeyHash = function(hashType, hex) {
     if(typeof(this.hashes[hashType])!=="object")
         throw "getPublicKeyHash() called with incorrect hashType";
     if(typeof(hex)==="undefined")
@@ -121,16 +172,16 @@ pkps.publicKeyPins.prototype.getPublicKeyHash = function(hashType, hex) {
 
 /**
  * Performs mandatory selftests to ensure that JavaScript Public-Key-Pins calculator 
- * works properly with given JavaScript engine.
+ * works properly on given JavaScript engine.
  * All computed hashes of dummy certificate and dummy CSR are tested.
- * Before creating any pkps.publicKeyPins() objects, this method must have been called.
+ * Before creating any pkps.publicKeyPin() objects, this method must have been called.
  *
  * @throws string with textual description of failure.
  */
 pkps.doSelfTests = function() {
     try {
-        var pkpsTestCrt = new pkps.publicKeyPins(pkps.self_tests_crtPEM);
-        var pkpsTestCsr = new pkps.publicKeyPins(pkps.self_tests_csrPEM);
+        var pkpsTestCrt = new pkps.publicKeyPin(pkps.self_tests_crtPEM);
+        var pkpsTestCsr = new pkps.publicKeyPin(pkps.self_tests_csrPEM);
     }
     catch(e) {
         throw "An error occured while computing selftest hashes.\r\nMost likely your JavaScript engine (e.g. browser) doesn't correctly parse binary strings.";
@@ -138,6 +189,17 @@ pkps.doSelfTests = function() {
     if(Object.keys(pkpsTestCrt.hashes).length!==4)
         throw "Not all hashes are tested.";
     try {
+        if(
+          // verify certificate and CSR data
+             pkpsTestCrt.getPublicKeyPem()!==pkpsTestCsr.getPublicKeyPem()
+          || pkpsTestCrt.getPublicKeyPem().length!==460
+          || pkpsTestCrt.getType()!=="Certificate"
+          || pkpsTestCsr.getType()!=="CSR"
+          || pkpsTestCrt.getCN()!==pkpsTestCsr.getCN()
+          || pkpsTestCrt.getCN().length!==42
+        )
+            throw 2;
+
         if(
           // verify all certificate hashes
              pkpsTestCrt.getPublicKeyHash("sha1", true)==="0e5141dbaa777f806f8a203c2a56a873fcf0ad95"
@@ -165,7 +227,9 @@ pkps.doSelfTests = function() {
     catch(e) {
         if(typeof(e)==="number" && e===1)
             throw "Selftest hash(es) were computed incorrectly.\r\nMost likely your JavaScript engine (e.g. browser) doesn't correctly parse binary strings.";
+        else if(typeof(e)==="number" && e===2)
+            throw "Selftest certificate or CSR data were extracted incorrectly.\r\nMost likely your JavaScript engine (e.g. browser) doesn't correctly parse binary strings.";
         else
-            throw "An error occured while accessing selftest hashes.\r\nMost likely your JavaScript engine (e.g. browser) doesn't correctly parse binary strings.";
+            throw "An error occured while accessing selftest hashes or certificate/CSR data.\r\nMost likely your JavaScript engine (e.g. browser) doesn't correctly parse binary strings.";
     }
 }
