@@ -31,7 +31,7 @@ var pkps = pkps || {};
  * @param certificatesAndCsrs newline or space separated certificates and/or certificate signing requests in PEM format.
  * @return publicKeyPinsSet object with set of the hashes.
  *   formatReport(), hasWarnings(), formatWarnings() and formatPKPHeader() methods should be used on this object.
- * @throws string with textual description of failure.
+ * @throws Error object with textual description of failure as message.
  */
 pkps.publicKeyPinsSet = function(certificatesAndCsrs) {
     this.pins = new Array();
@@ -51,7 +51,7 @@ pkps.publicKeyPinsSet = function(certificatesAndCsrs) {
     // split input
     pems = certificatesAndCsrs.split("-----BEGIN ");
     if(pems.length<2 || pems[0].trim()!=="")
-        throw "Unable to split input into PEM certificates/CSRs.";
+        throw new Error("Unable to split input into PEM certificates/CSRs.");
 
     // generate Public-Key-Pins
     for(i=1; i<pems.length; i++) {
@@ -147,12 +147,14 @@ pkps.publicKeyPinsSet.prototype.formatWarnings = function(formatString) {
  * @param maxAge integer value of max-age directive.
  * @param includeSubDomains boolean whether to add includeSubDomains directive.
  * @return string with value of Public-Key-Pins HTTP header.
- * @throws string with textual description of failure.
+ * @throws Error object with textual description of failure as message, if called incorrectly.
  */
 pkps.publicKeyPinsSet.prototype.formatPKPHeader = function(maxAge, includeSubDomains) {
     // input validation
-    if(typeof(maxAge)!=="number" || maxAge.match(/^[0-9]+$/)==null || typeof(includeSubDomains)!=="boolean")
-        throw "getPKPHeader() called with incorrect parameter(s)";
+    if(typeof(maxAge)!=="number" || maxAge.match(/^[0-9]+$/)==null)
+        throw new Error("getPKPHeader() called with incorrect maxAge");
+    if(typeof(includeSubDomains)!=="boolean")
+        throw new Error("getPKPHeader() called with incorrect includeSubDomains");
 
     var i;
     var ret = "";
@@ -174,16 +176,16 @@ pkps.publicKeyPinsSet.prototype.formatPKPHeader = function(maxAge, includeSubDom
  * @param certificateOrCsr certificate or certificate signing request in PEM format.
  * @return publicKeyPin object with the hashes (and other data).
  *   getPublicKeyHash() and getPublicKeyPem() methods should be used on this object.
- * @throws string with textual description of failure.
+ * @throws Error object with textual description of failure as message.
  */
 pkps.publicKeyPin = function(certificateOrCsr) {
     // input validation
     if(typeof(certificateOrCsr)!=="string" || certificateOrCsr.length<220)
-        throw "Unable to decode input.";
+        throw new Error("Unable to decode input.");
 
     // allow only after selftests have been passed (excl. selftest values)
     if(certificateOrCsr!==pkps.self_tests_crtPEM && certificateOrCsr!==pkps.self_tests_csrPEM && (typeof(pkps.self_tests_for_PublicKeyPins_JS_calculator)!=="string" || pkps.self_tests_for_PublicKeyPins_JS_calculator!=="selftests_passed_OK"))
-        throw "Self tests must be passed before doing any real calculations.";
+        throw new Error("Self tests must be passed before doing any real calculations.");
 
     this.pk = null;
     this.pkpem = null;
@@ -206,7 +208,7 @@ pkps.publicKeyPin = function(certificateOrCsr) {
         }
     }
     catch(e) {
-        throw "Unable to decode certificate/CSR.";
+        throw new Error("Unable to decode certificate/CSR.");
     }
 
     try {
@@ -223,7 +225,7 @@ pkps.publicKeyPin = function(certificateOrCsr) {
             throw 3;
     }
     catch(e) {
-        throw "Unable extract public key.";
+        throw new Error("Unable extract public key.");
     }
 
     try {
@@ -233,7 +235,7 @@ pkps.publicKeyPin = function(certificateOrCsr) {
             throw 1;
     }
     catch(e) {
-        throw "Unable extract Common Name.";
+        throw new Error("Unable extract Common Name.");
     }
 
     try {
@@ -244,7 +246,7 @@ pkps.publicKeyPin = function(certificateOrCsr) {
         this.addHash("sha512", forge.md.sha512, 64);
     }
     catch(e) {
-        throw "Error generating hashes.";
+        throw new Error("Error generating hashes.");
     }
 }
 
@@ -303,16 +305,16 @@ pkps.publicKeyPin.prototype.getCN = function() {
  * @param hex specifies to return hash in hex format.
  *   Boolean true must be specified or this parameter must be omitted.
  * @return string with public key hash either in Base64 or hex format.
- * @throws string with error description if called incurrectly.
+ * @throws Error object with textual description of failure as message, if called incorrectly.
  */
 pkps.publicKeyPin.prototype.getPublicKeyHash = function(hashType, hex) {
     if(typeof(this.hashes[hashType])!=="object")
-        throw "getPublicKeyHash() called with incorrect hashType";
+        throw new Error("getPublicKeyHash() called with incorrect hashType");
     if(typeof(hex)==="undefined")
         return this.hashes[hashType].base64;
     if(hex===true)
         return this.hashes[hashType].hex;
-    throw "getPublicKeyHash() called with incorrect parameter hex value";
+    throw new Error("getPublicKeyHash() called with incorrect parameter hex value");
 }
 
 /**
@@ -321,7 +323,7 @@ pkps.publicKeyPin.prototype.getPublicKeyHash = function(hashType, hex) {
  * All computed hashes of dummy certificate and dummy CSR are tested.
  * Before creating any pkps.publicKeyPin() objects, this method must have been called.
  *
- * @throws string with textual description of failure.
+ * @throws Error object with textual description of failure as message.
  */
 pkps.doSelfTests = function() {
     try {
@@ -329,10 +331,10 @@ pkps.doSelfTests = function() {
         var pkpsTestCsr = new pkps.publicKeyPin(pkps.self_tests_csrPEM);
     }
     catch(e) {
-        throw "An error occured while computing selftest hashes.\r\nMost likely your JavaScript engine (e.g. browser) doesn't correctly parse binary strings.";
+        throw new Error("An error occured while computing selftest hashes.\r\nMost likely your JavaScript engine (e.g. browser) doesn't correctly parse binary strings.");
     }
     if(Object.keys(pkpsTestCrt.hashes).length!==4)
-        throw "Not all hashes are tested.";
+        throw new Error("Not all hashes are tested.");
     try {
         if(
           // verify certificate and CSR data
@@ -371,10 +373,10 @@ pkps.doSelfTests = function() {
     }
     catch(e) {
         if(typeof(e)==="number" && e===1)
-            throw "Selftest hash(es) were computed incorrectly.\r\nMost likely your JavaScript engine (e.g. browser) doesn't correctly parse binary strings.";
+            throw new Error("Selftest hash(es) were computed incorrectly.\r\nMost likely your JavaScript engine (e.g. browser) doesn't correctly parse binary strings.");
         else if(typeof(e)==="number" && e===2)
-            throw "Selftest certificate or CSR data were extracted incorrectly.\r\nMost likely your JavaScript engine (e.g. browser) doesn't correctly parse binary strings.";
+            throw new Error("Selftest certificate or CSR data were extracted incorrectly.\r\nMost likely your JavaScript engine (e.g. browser) doesn't correctly parse binary strings.");
         else
-            throw "An error occured while accessing selftest hashes or certificate/CSR data.\r\nMost likely your JavaScript engine (e.g. browser) doesn't correctly parse binary strings.";
+            throw new Error("An error occured while accessing selftest hashes or certificate/CSR data.\r\nMost likely your JavaScript engine (e.g. browser) doesn't correctly parse binary strings.");
     }
 }
