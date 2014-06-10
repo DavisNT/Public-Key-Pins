@@ -151,7 +151,7 @@ pkps.publicKeyPinsSet.prototype.formatWarnings = function(formatString) {
  */
 pkps.publicKeyPinsSet.prototype.formatPKPHeader = function(maxAge, includeSubDomains) {
     // input validation
-    if(typeof(maxAge)!=="number" || maxAge.match(/^[0-9]+$/)==null)
+    if(typeof(maxAge)!=="number" || maxAge.toString().match(/^[0-9]+$/)==null)
         throw new Error("getPKPHeader() called with incorrect maxAge");
     if(typeof(includeSubDomains)!=="boolean")
         throw new Error("getPKPHeader() called with incorrect includeSubDomains");
