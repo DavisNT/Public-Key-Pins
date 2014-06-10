@@ -30,7 +30,8 @@ var pkps = pkps || {};
  *
  * @param certificatesAndCsrs newline or space separated certificates and/or certificate signing requests in PEM format.
  * @return publicKeyPinsSet object with set of the hashes.
- *   formatReport(), hasWarnings(), formatWarnings() and formatPKPHeader() methods should be used on this object.
+ *   formatReport(), hasWarnings(), formatWarnings(), formatPKPHeaderComplete() and formatPKPHeaderValue() methods 
+ *   should be used on this object.
  * @throws Error object with textual description of failure as message.
  */
 pkps.publicKeyPinsSet = function(certificatesAndCsrs) {
@@ -149,7 +150,7 @@ pkps.publicKeyPinsSet.prototype.formatWarnings = function(formatString) {
  * @return string with value of Public-Key-Pins HTTP header.
  * @throws Error object with textual description of failure as message, if called incorrectly.
  */
-pkps.publicKeyPinsSet.prototype.formatPKPHeader = function(maxAge, includeSubDomains) {
+pkps.publicKeyPinsSet.prototype.formatPKPHeaderValue = function(maxAge, includeSubDomains) {
     // input validation
     if(typeof(maxAge)!=="number" || maxAge.toString().match(/^[0-9]+$/)==null)
         throw new Error("getPKPHeader() called with incorrect maxAge");
@@ -166,6 +167,18 @@ pkps.publicKeyPinsSet.prototype.formatPKPHeader = function(maxAge, includeSubDom
     if(includeSubDomains)
         ret += "; includeSubDomains";
     return ret;
+}
+
+/**
+ * Generates/formats complete Public-Key-Pins HTTP header.
+ *
+ * @param maxAge integer value of max-age directive.
+ * @param includeSubDomains boolean whether to add includeSubDomains directive.
+ * @return string with value of Public-Key-Pins HTTP header.
+ * @throws Error object with textual description of failure as message, if called incorrectly.
+ */
+pkps.publicKeyPinsSet.prototype.formatPKPHeaderComplete = function(maxAge, includeSubDomains) {
+    return "Public-Key-Pins: "+this.formatPKPHeaderValue(maxAge, includeSubDomains);
 }
 
 /**
