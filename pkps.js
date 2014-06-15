@@ -1,6 +1,6 @@
 /* JavaScript Public-Key-Pins calculator - JavaScript library for easy 
  * calculation of public key hashes for use in Public Key Pinning Extension for HTTP.
- * Version 0.9.9
+ * Version 1.0
  * Copyright (C) 2014 Davis Mosenkovs
  *
  * This program is free software; you can redistribute it and/or
@@ -30,8 +30,8 @@ var pkps = pkps || {};
  *
  * @param certificatesAndCsrs newline or space separated certificates and/or certificate signing requests in PEM format.
  * @return publicKeyPinsSet object with set of the hashes.
- *   formatReport(), hasWarnings(), formatWarnings(), formatPKPHeaderComplete() and formatPKPHeaderValue() methods 
- *   should be used on this object.
+ *   getCount(), formatReport(), hasWarnings(), formatWarnings(), formatPKPHeaderComplete()
+ *   and formatPKPHeaderValue() methods of this object should be used.
  * @throws Error object with textual description of failure as message.
  */
 pkps.publicKeyPinsSet = function(certificatesAndCsrs) {
@@ -60,6 +60,10 @@ pkps.publicKeyPinsSet = function(certificatesAndCsrs) {
         this.inputs.push("-----BEGIN "+pems[i].trim());
     }
 
+    // verify result count
+    if(this.pins.length!==this.inputs.length || this.pins.length!==pems.length-1)
+        throw new Error("Internal error occurred.");
+
     // detect possible issues
     for(i=0; i<this.pins.length; i++) {
         // different common names
@@ -83,7 +87,16 @@ pkps.publicKeyPinsSet = function(certificatesAndCsrs) {
     if(this.pins.length<2)
         this.warnings.push("At least two pins (one of them must be backup pin - pin of securely held offline backup key) are required by the standard.");
     if(this.pins.length<3)
-        this.warnings.push("Three or more pins (two or more backup key pins - pins of securely held offline backup keys) should be considered.");
+        this.warnings.push("Three or more pins (two or more backup key pins - pins of securely held offline backup keys) are recommended.");
+}
+
+/**
+ * Returns number of certificates/CSRs processed in publicKeyPinsSet.
+ *
+ * @return integer with number of objects processed, that is number of pins, that is number entries in report.
+ */
+pkps.publicKeyPinsSet.prototype.getCount = function() {
+    return this.pins.length;
 }
 
 /**
@@ -152,7 +165,7 @@ pkps.publicKeyPinsSet.prototype.formatWarnings = function(formatString) {
  */
 pkps.publicKeyPinsSet.prototype.formatPKPHeaderValue = function(maxAge, includeSubDomains) {
     // input validation
-    if(typeof(maxAge)!=="number" || maxAge.toString().match(/^[0-9]+$/)==null)
+    if(typeof(maxAge)!=="number" || maxAge<1 || maxAge.toString().match(/^[0-9]+$/)==null)
         throw new Error("getPKPHeader() called with incorrect maxAge");
     if(typeof(includeSubDomains)!=="boolean")
         throw new Error("getPKPHeader() called with incorrect includeSubDomains");
@@ -174,11 +187,44 @@ pkps.publicKeyPinsSet.prototype.formatPKPHeaderValue = function(maxAge, includeS
  *
  * @param maxAge integer value of max-age directive.
  * @param includeSubDomains boolean whether to add includeSubDomains directive.
- * @return string with value of Public-Key-Pins HTTP header.
+ * @return string with complete Public-Key-Pins HTTP header.
  * @throws Error object with textual description of failure as message, if called incorrectly.
  */
 pkps.publicKeyPinsSet.prototype.formatPKPHeaderComplete = function(maxAge, includeSubDomains) {
     return "Public-Key-Pins: "+this.formatPKPHeaderValue(maxAge, includeSubDomains);
+}
+
+/**
+ * Generates/formats value of HSTS HTTP header.
+ *
+ * @param maxAge integer value of max-age directive.
+ * @param includeSubDomains boolean whether to add includeSubDomains directive.
+ * @return string with value of HSTS HTTP header.
+ * @throws Error object with textual description of failure as message, if called incorrectly.
+ */
+pkps.formatHSTSHeaderValue = function(maxAge, includeSubDomains) {
+    // input validation
+    if(typeof(maxAge)!=="number" || maxAge<1 || maxAge.toString().match(/^[0-9]+$/)==null)
+        throw new Error("getHSTSHeader() called with incorrect maxAge");
+    if(typeof(includeSubDomains)!=="boolean")
+        throw new Error("getHSTSHeader() called with incorrect includeSubDomains");
+
+    var ret = "max-age="+maxAge;
+    if(includeSubDomains)
+        ret += "; includeSubDomains";
+    return ret;
+}
+
+/**
+ * Generates/formats complete HSTS HTTP header.
+ *
+ * @param maxAge integer value of max-age directive.
+ * @param includeSubDomains boolean whether to add includeSubDomains directive.
+ * @return string with complete HSTS HTTP header.
+ * @throws Error object with textual description of failure as message, if called incorrectly.
+ */
+pkps.formatHSTSHeaderComplete = function(maxAge, includeSubDomains) {
+    return "Strict-Transport-Security: "+pkps.formatHSTSHeaderValue(maxAge, includeSubDomains);
 }
 
 /**
@@ -188,7 +234,7 @@ pkps.publicKeyPinsSet.prototype.formatPKPHeaderComplete = function(maxAge, inclu
  *
  * @param certificateOrCsr certificate or certificate signing request in PEM format.
  * @return publicKeyPin object with the hashes (and other data).
- *   getPublicKeyHash() and getPublicKeyPem() methods should be used on this object.
+ *   getPublicKeyHash() and getPublicKeyPem() methods of this object should be used.
  * @throws Error object with textual description of failure as message.
  */
 pkps.publicKeyPin = function(certificateOrCsr) {
@@ -301,7 +347,7 @@ pkps.publicKeyPin.prototype.getType = function() {
 }
 
 /**
- * Returns Common Name (CN attribute) of object from wiich public key was extracted.
+ * Returns Common Name (CN attribute) of object from which public key was extracted.
  *
  * @return string with Common Name.
  */
@@ -344,7 +390,7 @@ pkps.doSelfTests = function() {
         var pkpsTestCsr = new pkps.publicKeyPin(pkps.self_tests_csrPEM);
     }
     catch(e) {
-        throw new Error("An error occured while computing selftest hashes.\r\nMost likely your JavaScript engine (e.g. browser) doesn't correctly parse binary strings.");
+        throw new Error("An error occurred while computing selftest hashes.\r\nMost likely your JavaScript engine (e.g. browser) doesn't correctly parse binary strings.");
     }
     if(Object.keys(pkpsTestCrt.hashes).length!==4)
         throw new Error("Not all hashes are tested.");
@@ -390,6 +436,6 @@ pkps.doSelfTests = function() {
         else if(typeof(e)==="number" && e===2)
             throw new Error("Selftest certificate or CSR data were extracted incorrectly.\r\nMost likely your JavaScript engine (e.g. browser) doesn't correctly parse binary strings.");
         else
-            throw new Error("An error occured while accessing selftest hashes or certificate/CSR data.\r\nMost likely your JavaScript engine (e.g. browser) doesn't correctly parse binary strings.");
+            throw new Error("An error occurred while accessing selftest hashes or certificate/CSR data.\r\nMost likely your JavaScript engine (e.g. browser) doesn't correctly parse binary strings.");
     }
 }

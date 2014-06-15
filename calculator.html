@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>JavaScript Public-Key-Pins calculator</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<style type="text/css">
+.results, #certcsr { width: 640px; }
+.results + .results { margin-top: 14px; }
+.resobj { border-width: 1px; border-style: solid; border-color: black; padding: 4px; }
+div + .resobj, div + .warnings { margin-top: 14px; }
+.warnings { border-width: 1px; border-style: solid; border-color: #A00000; padding: 4px; color: #A00000; }
+.restitle { display: block; font-weight: bold; }
+.restext, .reptext { display: block; font-family: monospace; }
+.reptext { white-space: pre; }
+.restext + .restitle, .reptext + .restitle { margin-top: 14px; }
+body { padding: 8px; }
+</style>
+</head>
+<body>
+<h1>JavaScript Public-Key-Pins calculator</h1>
+<a href="https://projects.dm.id.lv/Public-Key-Pins_calculator" target="_blank">Project website</a> | 
+<a href="https://github.com/DavisNT/Public-Key-Pins" target="_blank">GitHub page</a> | 
+Based on <a href="https://tools.ietf.org/html/draft-ietf-websec-key-pinning" target="_blank">Internet standard Draft</a><br /><br />
+Copyright &copy; 2014 Dāvis Mošenkovs
+<br /><br />
+<script type="text/javascript" src="forge.min.js"></script>
+<script type="text/javascript" src="pkps.js"></script>
+<script type="text/javascript">
+function calculate() {
+    try {
+        if(document.generator.eula.checked!==true)
+            throw new Error("License (GNU General Public License) must be accepted to use this calculator.");
+
+        var pins = new pkps.publicKeyPinsSet(document.generator.certcsr.value);
+
+        var result = "<div class=\"resobj\"><span class=\"restitle\">Number of certificates/CSRs processed:</span><span class=\"restext\">"+pins.getCount()+"</span></div>";
+        result += pins.formatReport("<div class=\"resobj\"><span class=\"restitle\">Input:</span><span class=\"reptext\">{Input}</span><span class=\"restitle\">Type:</span><span class=\"reptext\">{Type}</span><span class=\"restitle\">Common Name:</span><span class=\"reptext\">{CN}</span><span class=\"restitle\">Public key:</span><span class=\"reptext\">{PublicKey}</span><span class=\"restitle\">Public key SHA256 in hexadecimal format:</span><span class=\"reptext\">{SHA256Hex}</span><span class=\"restitle\">Public key SHA256 in Base64 format:</span><span class=\"reptext\">{SHA256}</span></div>");
+
+        if(pins.hasWarnings())
+            result += pins.formatWarnings("<div class=\"warnings\"><span class=\"restitle\">WARNING!</span><span class=\"restext\">{Warning}</span></div>");
+
+        result += "<div class=\"resobj\"><span class=\"restitle\">Public-Key-Pins HTTP header:</span><span class=\"restext\">"+pins.formatPKPHeaderComplete(parseInt(document.generator.maxage.value), document.generator.subdomains.checked)+"</span></div>";
+
+        if(document.generator.hsts.checked)
+            result += "<div class=\"resobj\"><span class=\"restitle\">HSTS HTTP header:</span><span class=\"restext\">"+pkps.formatHSTSHeaderComplete(parseInt(document.generator.maxage.value), document.generator.subdomains.checked)+"</span></div>";
+
+        document.getElementById("results").innerHTML=result;
+    }
+    catch(e) {
+        if(typeof(e)=="object" && typeof(e.message)=="string")
+            alert(e.message);
+        else
+            alert("Error occured while generating public key pins.");
+    }    
+}
+</script>
+<form name="generator" action="javascript:calculate()">
+Certificates and/or Certificate Signing Requests (in PEM format; newline separated) containing public keys to be pinned:
+<textarea name="certcsr" rows="12" id="certcsr">
+</textarea><br />
+Time for clients to remember these pins: <select name="maxage">
+<option value="3600">1 hour (for testing only)</option>
+<option value="5184000">60 days</option>
+<option value="15768000">6 months</option>
+<option value="31536000" selected>12 months</option>
+</select>
+<br />
+<input type="checkbox" name="subdomains" value="1">Pin these keys also for all subdomains (use with caution!)<br />
+<input type="checkbox" name="hsts" value="1" checked>Display also <a href="https://tools.ietf.org/html/rfc6797" target="_blank">HSTS</a> header (with same values)<br />
+<input type="checkbox" name="eula" value="1">I have read and accepted <a href="http://www.gnu.org/copyleft/gpl.html" target="_blank">license agreement (GNU General Public License)</a>, distributed in file <a href="LICENSE" target="_blank">LICENSE</a><br />
+<input type="submit" name="submit" value="Calculate">
+</form>
+<br />
+<div class="results">
+<div class="warnings"><span class="restitle">WARNING!</span><span class="restext">Incorrect usage (or malfunction) of this program (tool) may lock users out of HTTPS server for time (in seconds) specified in max-age directive of HTTP header Public-Key-Pins. For use on production systems special precautions (e.g. result validation by manual calculation) are recommended. Another, simpler but less safe, precaution is using this calculator on certificates or CSRs that are generated exactly the same way.</span></div>
+<div class="warnings"><span class="restitle">NOTICE!</span><span class="restext">This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</span></div>
+</div>
+<div id="results" class="results">
+<script type="text/javascript">
+if(typeof(forge)=="undefined")
+    document.write("<div class=\"warnings\"><span class=\"restitle\">ERROR!</span><span class=\"restext\">Required file forge.min.js was not loaded.</span></div>");
+if(typeof(pkps)=="undefined")
+    document.write("<div class=\"warnings\"><span class=\"restitle\">ERROR!</span><span class=\"restext\">Required file pkps.js was not loaded.</span></div>");
+</script>
+</div>
+</body>
+</html>
