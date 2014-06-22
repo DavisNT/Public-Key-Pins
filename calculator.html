@@ -17,7 +17,7 @@ body { padding: 8px; }
 </style>
 </head>
 <body>
-<h1>JavaScript Public-Key-Pins calculator</h1>
+<h1>JavaScript Public-Key-Pins calculator v1.0.1</h1>
 <a href="https://projects.dm.id.lv/Public-Key-Pins_calculator" target="_blank">Project website</a> | 
 <a href="https://github.com/DavisNT/Public-Key-Pins" target="_blank">GitHub page</a> | 
 Based on <a href="https://tools.ietf.org/html/draft-ietf-websec-key-pinning" target="_blank">Internet standard Draft</a><br /><br />
@@ -66,13 +66,13 @@ Time for clients to remember these pins: <select name="maxage">
 </select>
 <br />
 <input type="checkbox" name="subdomains" value="1">Pin these keys also for all subdomains (use with caution!)<br />
-<input type="checkbox" name="hsts" value="1" checked>Display also <a href="https://tools.ietf.org/html/rfc6797" target="_blank">HSTS</a> header (with same values)<br />
-<input type="checkbox" name="eula" value="1">I have read and accepted <a href="http://www.gnu.org/copyleft/gpl.html" target="_blank">license agreement (GNU General Public License)</a>, distributed in file <a href="LICENSE" target="_blank">LICENSE</a><br />
+<input type="checkbox" name="hsts" value="1" checked>Create also <a href="https://tools.ietf.org/html/rfc6797" target="_blank">HSTS</a> header (with same values)<br />
+<input type="checkbox" name="eula" value="1">I have read and accepted <a href="http://www.gnu.org/copyleft/gpl.html" target="_blank">license agreement (GNU General Public License)</a> (distributed in file LICENSE along with this program)<br />
 <input type="submit" name="submit" value="Calculate">
 </form>
 <br />
 <div class="results">
-<div class="warnings"><span class="restitle">WARNING!</span><span class="restext">Incorrect usage (or malfunction) of this program (tool) may lock users out of HTTPS server for time (in seconds) specified in max-age directive of HTTP header Public-Key-Pins. For use on production systems special precautions (e.g. result validation by manual calculation) are recommended. Another, simpler but less safe, precaution is using this calculator on certificates or CSRs that are generated exactly the same way.</span></div>
+<div class="warnings"><span class="restitle">WARNING!</span><span class="restext">Incorrect usage (or malfunction) of this program (tool) may lock users out of HTTPS server for time (in seconds) specified in max-age directive of HTTP header Public-Key-Pins. For use on production systems special precautions (e.g. result validation by manual calculation or usage on certificates/CSRs that are generated exactly the same way) are recommended.</span></div>
 <div class="warnings"><span class="restitle">NOTICE!</span><span class="restext">This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</span></div>
 </div>
 <div id="results" class="results">

@@ -1,6 +1,6 @@
 /* JavaScript Public-Key-Pins calculator - JavaScript library for easy 
  * calculation of public key hashes for use in Public Key Pinning Extension for HTTP.
- * Version 1.0
+ * Version 1.0.1
  * Copyright (C) 2014 Davis Mosenkovs
  *
  * This program is free software; you can redistribute it and/or

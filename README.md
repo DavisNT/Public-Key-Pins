@@ -4,13 +4,13 @@ JavaScript Public-Key-Pins calculator - JavaScript library for easy calculation 
 Public Key Pinning Extension for HTTP. 
 Ready to use HTML form is provided along with the library.
 
-Version 1.0
+Version 1.0.1
 
 Copyright (C) 2014 Davis Mosenkovs
 
 ## Introduction
 
-[Public Key Pinning Extension for HTTP](https://tools.ietf.org/html/draft-ietf-websec-key-pinning) is an internet 
+[Public Key Pinning Extension for HTTP](https://tools.ietf.org/html/draft-ietf-websec-key-pinning) is an internet standards 
 draft for instructing HTTP clients to associate servers with specific SSL certificates. Such associations should 
 be able to mitigate most [MITM attacks](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) on HTTP over 
 SSL/TLS connections.
@@ -24,11 +24,14 @@ It can be used as offline HTML/JavaScript form or embedded into web site or othe
 Before using this program (tool) user should be familiar with [Public Key Pinning Extension for HTTP](https://tools.ietf.org/html/draft-ietf-websec-key-pinning) 
 and [HTTP Strict Transport Security (HSTS)](https://tools.ietf.org/html/rfc6797)! Incorrect usage (or malfunction) 
 of this program (tool) may lock users out of HTTPS server for time (in seconds) specified in max-age directive of 
-HTTP header _Public-Key-Pins_. For use on production systems special precautions (e.g. result validation by manual calculation) are recommended. 
-Another, simpler but less safe, precaution is using this calculator on certificates or CSRs that are generated exactly the same way.
+HTTP header _Public-Key-Pins_. For use on production systems special precautions (e.g. result validation by manual calculation or usage 
+on certificates/CSRs that are generated exactly the same way) are recommended. 
 
 All files contained in this repository can be downloaded (after reading and accepting `LICENSE`) for off-line use of `calculator.html` in web browser. 
-File `forge.min.js` can be re-created as specified below (ensuring its integrity), other files are simple enough to be easily audited.
+File `forge.min.js` can be re-created as specified below (ensuring its integrity), other files are clearly readable and simple enough to be easily audited. 
+Additionally all files are signed by OpenPGP key (fingerprint: ED9FBB77211D142EAAF8E9C1FA007FA5D26E2AE4) that must be mentioned on https://projects.dm.id.lv/ 
+and GnuPG/PGP keyservers. 
+Download of ZIP file is suggested for signature verification, because Git clients may break signatures by converting newlines in signed files.
 
 It is suggested to use a secure off-line computer for generation of RSA key-pairs, Certificate Signing Requests (CSRs) and Public-Key-Pins.
 It is highly recommended to store backup keys (along with CSRs) in **safe and secure** off-line storage. 
@@ -40,7 +43,7 @@ During key change one of backup keys must be used as the new key, a new backup k
 be created, and new Public-Key-Pins value (containing pin of new backup key and **not** containing pin of old key) must be created and set up.
 
 Key generation/storage on server is highly discouraged, because in case of server compromise attacker could gain access to private keys 
-of all pinned keys and there would be no way to change key to uncompromised one (without locking users out of server or changing address).
+of all pinned keys and there would be no way to change key to uncompromised one (without locking users out of server or changing website address).
 
 Also special precautions must be taken when pinning keys to all subdomains (using _includeSubDomains_ directive). 
 For example, if company's main website https://example.com sends _Public-Key-Pins_ header containing _includeSubDomains_ directive and 
