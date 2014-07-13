@@ -1,10 +1,10 @@
-JavaScript Public-Key-Pins calculator
+JavaScript Public-Key-Pins (HPKP) calculator
 ===============
-JavaScript Public-Key-Pins calculator - JavaScript library for easy calculation of public key hashes for use in 
-Public Key Pinning Extension for HTTP. 
+JavaScript Public-Key-Pins (HPKP) calculator - JavaScript library for easy calculation of public key hashes for use in 
+[Public Key Pinning Extension for HTTP](https://tools.ietf.org/html/draft-ietf-websec-key-pinning). 
 Ready to use HTML form is provided along with the library.
 
-Version 1.0.1
+Version 1.0.2
 
 Copyright (C) 2014 Davis Mosenkovs
 
@@ -15,7 +15,7 @@ draft for instructing HTTP clients to associate servers with specific SSL certif
 be able to mitigate most [MITM attacks](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) on HTTP over 
 SSL/TLS connections.
 
-JavaScript Public-Key-Pins calculator allows easy calculation of Public-Key-Pins HTTP header value for specified 
+JavaScript Public-Key-Pins (HPKP) calculator allows easy calculation of Public-Key-Pins HTTP header value for specified 
 [X.509](https://en.wikipedia.org/wiki/X.509) certificates or [certificate signing requests](https://en.wikipedia.org/wiki/Certificate_signing_request). 
 It can be used as offline HTML/JavaScript form or embedded into web site or other JavaScript application (using API provided by `pkps.js`).
 
@@ -24,13 +24,14 @@ It can be used as offline HTML/JavaScript form or embedded into web site or othe
 Before using this program (tool) user should be familiar with [Public Key Pinning Extension for HTTP](https://tools.ietf.org/html/draft-ietf-websec-key-pinning) 
 and [HTTP Strict Transport Security (HSTS)](https://tools.ietf.org/html/rfc6797)! Incorrect usage (or malfunction) 
 of this program (tool) may lock users out of HTTPS server for time (in seconds) specified in max-age directive of 
-HTTP header _Public-Key-Pins_. For use on production systems special precautions (e.g. result validation by manual calculation or usage 
-on certificates/CSRs that are generated exactly the same way) are recommended. 
+HTTP header _Public-Key-Pins_. For use on production systems special precautions (e.g. result verification by 
+[other calculators](https://projects.dm.id.lv/Public-Key-Pins_calculator#Other_HPKP_calculators)) are recommended. 
 
 All files contained in this repository can be downloaded (after reading and accepting `LICENSE`) for off-line use of `calculator.html` in web browser. 
 File `forge.min.js` can be re-created as specified below (ensuring its integrity), other files are clearly readable and simple enough to be easily audited. 
-Additionally all files are signed by OpenPGP key (fingerprint: ED9FBB77211D142EAAF8E9C1FA007FA5D26E2AE4) that must be mentioned on https://projects.dm.id.lv/ 
-and GnuPG/PGP keyservers. 
+Additionally all files are signed by OpenPGP key (fingerprint: ED9F BB77 211D 142E AAF8 E9C1 FA00 7FA5 D26E 2AE4) that must be mentioned on https://projects.dm.id.lv/ 
+and GnuPG/PGP keyservers. All files (including signatures) and Git commit SHA1 of releases are timestamped on BitCoin network (see 
+[project website](https://projects.dm.id.lv/Public-Key-Pins_calculator) for details). 
 Download of ZIP file is suggested for signature verification, because Git clients may break signatures by converting newlines in signed files.
 
 It is suggested to use a secure off-line computer for generation of RSA key-pairs, Certificate Signing Requests (CSRs) and Public-Key-Pins.

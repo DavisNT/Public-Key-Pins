@@ -1,6 +1,6 @@
-/* JavaScript Public-Key-Pins calculator - JavaScript library for easy 
+/* JavaScript Public-Key-Pins (HPKP) calculator - JavaScript library for easy 
  * calculation of public key hashes for use in Public Key Pinning Extension for HTTP.
- * Version 1.0.1
+ * Version 1.0.2
  * Copyright (C) 2014 Davis Mosenkovs
  *
  * This program is free software; you can redistribute it and/or
@@ -299,10 +299,10 @@ pkps.publicKeyPin = function(certificateOrCsr) {
 
     try {
         // generate hashes
-        this.addHash("sha1", forge.md.sha1, 20);
-        this.addHash("sha256", forge.md.sha256, 32);
-        this.addHash("sha384", forge.md.sha384, 48);
-        this.addHash("sha512", forge.md.sha512, 64);
+        this.addHash("sha1", forge.md.sha1, 20, "da39a3ee5e6b4b0d3255bfef95601890afd80709");
+        this.addHash("sha256", forge.md.sha256, 32, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+        this.addHash("sha384", forge.md.sha384, 48, "38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b");
+        this.addHash("sha512", forge.md.sha512, 64, "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e");
     }
     catch(e) {
         throw new Error("Error generating hashes.");
@@ -310,7 +310,7 @@ pkps.publicKeyPin = function(certificateOrCsr) {
 }
 
 // for internal use only - generates and stores a hash
-pkps.publicKeyPin.prototype.addHash = function(hashType, forgeMd, dSize) {
+pkps.publicKeyPin.prototype.addHash = function(hashType, forgeMd, dSize, nullHash) {
     var md = forgeMd.create();
     if(typeof(this.pk)!=="string" || this.keysize!==this.pk.length) // check key length
         throw 1;
@@ -322,6 +322,9 @@ pkps.publicKeyPin.prototype.addHash = function(hashType, forgeMd, dSize) {
     var hcheck2 = forge.util.decode64(this.hashes[hashType].base64);
     if(hcheck1!==hcheck2 || hcheck1.length!==dSize || hcheck2.length!==dSize)
         throw 2;
+    // check that digest is not from empty string
+    if(this.hashes[hashType].hex.toLowerCase()==nullHash || this.hashes[hashType].hex.toLowerCase().length!==nullHash.length)
+        throw 3;
 }
 
 // for internal use only - self-test certificate and CSR
