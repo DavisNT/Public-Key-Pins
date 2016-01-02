@@ -17,11 +17,11 @@ body { padding: 8px; }
 </style>
 </head>
 <body>
-<h1>JavaScript Public-Key-Pins (HPKP) calculator v1.0.2</h1>
+<h1>JavaScript Public-Key-Pins (HPKP) calculator v1.0.3</h1>
 <a href="https://projects.dm.id.lv/Public-Key-Pins_calculator" target="_blank">Project website</a> | 
 <a href="https://github.com/DavisNT/Public-Key-Pins" target="_blank">GitHub page</a> | 
-Based on <a href="https://tools.ietf.org/html/draft-ietf-websec-key-pinning" target="_blank">Internet standard Draft</a><br /><br />
-Copyright &copy; 2014 Dāvis Mošenkovs
+Based on <a href="https://tools.ietf.org/html/rfc7469" target="_blank">RFC 7469</a><br /><br />
+Copyright &copy; 2014&ndash;2016 Dāvis Mošenkovs
 <br /><br />
 <script type="text/javascript" src="forge.min.js"></script>
 <script type="text/javascript" src="pkps.js"></script>
@@ -55,7 +55,7 @@ function calculate() {
 }
 </script>
 <form name="generator" action="javascript:calculate()">
-Certificates and/or Certificate Signing Requests (in PEM format; newline separated) containing public keys to be pinned:
+Certificates and/or Certificate Signing Requests (in PEM format; newline separated) containing public keys to be pinned: <br />
 <textarea name="certcsr" rows="12" id="certcsr">
 </textarea><br />
 Time for clients to remember these pins: <select name="maxage">
@@ -72,7 +72,7 @@ Time for clients to remember these pins: <select name="maxage">
 </form>
 <br />
 <div class="results">
-<div class="warnings"><span class="restitle">WARNING!</span><span class="restext">Incorrect usage (or malfunction) of this program (tool) may lock users out of HTTPS server for time (in seconds) specified in max-age directive of HTTP header Public-Key-Pins. For use on production systems special precautions (e.g. result verification by other calculators (mentioned on project website)) are recommended.</span></div>
+<div class="warnings"><span class="restitle">WARNING!</span><span class="restext">Incorrect usage (or malfunction) of this program (tool) may lock users out of HTTPS server for time (in seconds) specified in max-age directive of HTTP header Public-Key-Pins. For use on production systems special precautions (e.g. result verification by <a href="https://tools.ietf.org/html/rfc7469#appendix-A" target="_blank">POSIX commands</a> or other calculators (mentioned on project website)) are recommended.</span></div>
 <div class="warnings"><span class="restitle">NOTICE!</span><span class="restext">Reporting (report-uri directive and Public-Key-Pins-Report-Only header) is outside of scope of this calculator.</span></div>
 <div class="warnings"><span class="restitle">NOTICE!</span><span class="restext">This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</span></div>
 </div>

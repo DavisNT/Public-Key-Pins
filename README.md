@@ -1,17 +1,17 @@
 JavaScript Public-Key-Pins (HPKP) calculator
 ===============
 JavaScript Public-Key-Pins (HPKP) calculator - JavaScript library for easy calculation of public key hashes for use in 
-[Public Key Pinning Extension for HTTP](https://tools.ietf.org/html/draft-ietf-websec-key-pinning). 
+[RFC 7469 Public Key Pinning Extension for HTTP](https://tools.ietf.org/html/rfc7469). 
 Ready to use HTML form is provided along with the library.
 
-Version 1.0.2
+Version 1.0.3
 
-Copyright (C) 2014 Davis Mosenkovs
+Copyright (C) 2014-2016 Davis Mosenkovs
 
 ## Introduction
 
-[Public Key Pinning Extension for HTTP](https://tools.ietf.org/html/draft-ietf-websec-key-pinning) is an internet standards 
-draft for instructing HTTP clients to associate servers with specific SSL certificates. Such associations should 
+[RFC 7469 Public Key Pinning Extension for HTTP](https://tools.ietf.org/html/rfc7469) is an internet standard 
+for instructing HTTP clients to associate servers with specific SSL certificates. Such associations should 
 be able to mitigate most [MITM attacks](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) on HTTP over 
 SSL/TLS connections.
 
@@ -21,16 +21,18 @@ It can be used as offline HTML/JavaScript form or embedded into web site or othe
 
 ## End-user usage
 
-Before using this program (tool) user should be familiar with [Public Key Pinning Extension for HTTP](https://tools.ietf.org/html/draft-ietf-websec-key-pinning) 
-and [HTTP Strict Transport Security (HSTS)](https://tools.ietf.org/html/rfc6797)! Incorrect usage (or malfunction) 
+Before using this program (tool) user should be familiar with [RFC 7469 Public Key Pinning Extension for HTTP](https://tools.ietf.org/html/rfc7469) 
+and [RFC 6797 HTTP Strict Transport Security (HSTS)](https://tools.ietf.org/html/rfc6797)! Incorrect usage (or malfunction) 
 of this program (tool) may lock users out of HTTPS server for time (in seconds) specified in max-age directive of 
 HTTP header _Public-Key-Pins_. For use on production systems special precautions (e.g. result verification by 
+[POSIX commands](https://tools.ietf.org/html/rfc7469#appendix-A) or 
 [other calculators](https://projects.dm.id.lv/Public-Key-Pins_calculator#Other_HPKP_calculators)) are recommended. 
 
 All files contained in this repository can be downloaded (after reading and accepting `LICENSE`) for off-line use of `calculator.html` in web browser. 
 File `forge.min.js` can be re-created as specified below (ensuring its integrity), other files are clearly readable and simple enough to be easily audited. 
-Additionally all files are signed by OpenPGP key (fingerprint: ED9F BB77 211D 142E AAF8 E9C1 FA00 7FA5 D26E 2AE4) that must be mentioned on https://projects.dm.id.lv/ 
-and GnuPG/PGP keyservers. All files (including signatures) and Git commit SHA1 of releases are timestamped on BitCoin network (see 
+Additionally all files are signed by OpenPGP key (fingerprint: ED9F BB77 211D 142E AAF8 E9C1 FA00 7FA5 D26E 2AE4) that must be mentioned on 
+[https://projects.dm.id.lv/](https://projects.dm.id.lv/), GnuPG/PGP keyservers and [https://keybase.io/davisnt](https://keybase.io/davisnt). 
+All files (including signatures) and Git commit SHA1 of releases are timestamped on BitCoin network (see 
 [project website](https://projects.dm.id.lv/Public-Key-Pins_calculator) for details). 
 Download of ZIP file is suggested for signature verification, because Git clients may break signatures by converting newlines in signed files.
 
@@ -49,6 +51,12 @@ of all pinned keys and there would be no way to change key to uncompromised one 
 Also special precautions must be taken when pinning keys to all subdomains (using _includeSubDomains_ directive). 
 For example, if company's main website https://example.com sends _Public-Key-Pins_ header containing _includeSubDomains_ directive and 
 customer self-service portal https://my.example.com uses key not pinned in _Public-Key-Pins_ header, then users will be locked out of https://my.example.com
+
+### GitHub Pages hosted copy
+
+Although downloading (and verifying off-line copy is preferred) a copy hosted on GitHub Pages is available at [https://hpkpcalc.github.io/](https://hpkpcalc.github.io/).
+
+GitHub repository of this copy is [available here](https://github.com/hpkpcalc/hpkpcalc.github.io). All involved files are exact copies of latest release. 
 
 ## Developer usage
 
