@@ -10,7 +10,7 @@ Copyright (C) 2014-2016 Davis Mosenkovs
 
 ## Introduction
 
-[RFC 7469 Public Key Pinning Extension for HTTP](https://tools.ietf.org/html/rfc7469) is an internet standard 
+[RFC 7469 Public Key Pinning Extension for HTTP](https://tools.ietf.org/html/rfc7469) is an Internet standard 
 for instructing HTTP clients to associate servers with specific SSL certificates. Such associations should 
 be able to mitigate most [MITM attacks](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) on HTTP over 
 SSL/TLS connections.
@@ -54,7 +54,7 @@ customer self-service portal https://my.example.com uses key not pinned in _Publ
 
 ### GitHub Pages hosted copy
 
-Although downloading (and verifying off-line copy is preferred) a copy hosted on GitHub Pages is available at [https://hpkpcalc.github.io/](https://hpkpcalc.github.io/).
+Although downloading (and verifying) off-line copy is preferred, a copy hosted on GitHub Pages is available at [https://hpkpcalc.github.io/](https://hpkpcalc.github.io/).
 
 GitHub repository of this copy is [available here](https://github.com/hpkpcalc/hpkpcalc.github.io). All involved files are exact copies of latest release. 
 
